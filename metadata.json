@@ -1,0 +1,6 @@
+{
+  "name": "قصه های دوزبانه توانسیتی | Tavan City Bilingual Stories",
+  "description": "کتاب داستان‌های تعاملی دوزبانه فارسی و انگلیسی کودکان با جعبه لایتنر، آموزش تلفظ، افکت صوتی زنده و آزمون درک مطلب",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
