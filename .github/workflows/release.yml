@@ -1,0 +1,72 @@
+name: Build Android Release APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v4
+      with:
+        packages: 'platform-tools'
+        license-accepted: true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Web Application
+      run: npm run build
+
+    - name: Grant execute permission for gradlew
+      run: |
+        if [ -f "./gradlew" ]; then
+          chmod +x ./gradlew
+        elif [ -f "./android/gradlew" ]; then
+          chmod +x ./android/gradlew
+        fi
+
+    - name: Sync Capacitor Android (Optional)
+      run: |
+        if [ -f "capacitor.config.json" ] || [ -f "capacitor.config.ts" ]; then
+          npx cap sync android || true
+        fi
+
+    - name: Build Release APK & AAB
+      run: |
+        if [ -f "./gradlew" ]; then
+          ./gradlew assembleRelease bundleRelease
+        elif [ -f "./android/gradlew" ]; then
+          cd android && ./gradlew assembleRelease bundleRelease
+        else
+          echo "Gradle wrapper not found, skipping native Android build."
+        fi
+
+    - name: Upload APK and AAB Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-apk-aab
+        path: |
+          app/build/outputs/apk/release/*.apk
+          app/build/outputs/bundle/release/*.aab
+          android/app/build/outputs/apk/release/*.apk
+          android/app/build/outputs/bundle/release/*.aab
+          dist/
